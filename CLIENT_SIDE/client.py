@@ -40,20 +40,27 @@ class RP_CLIENT:
 
     def __packetSetup(self, data, packet_n) :
         # Result
+
+        #print(len(data))
+
         ended, packet = False, b""
 
         if b"ENDED_FRAME" in data:
             data, ended = data[:data.index(b"ENDED_FRAME")], True
-
+        
         if b"PACKET_NUMBER_" in data and b"END_PACKET_" in data:
             data = data.split(b"PACKET_NUMBER_")[1].split(b"END_PACKET_")[0]
-
             if int(data[:2]) - packet_n == 0:
                 packet_n = int(data[:2]) + 1
                 packet = data[2:]
+        
 
+
+            
         return ended, packet_n, packet
     
+        if b"ENDED_FRAME" in data:
+            data, ended = data[:data.index(b"ENDED_FRAME")], True
     def __sendData(self):
         while True:
             if self.__tosend:
@@ -78,8 +85,10 @@ class RP_CLIENT:
                     print("Connection Timed Out.")
                     break
             try:
-                self.Image = np.frombuffer(frame, dtype=np.uint8).reshape(self.shape)
-            except Exception as e:
+                frame = np.frombuffer(frame, dtype=np.uint8)
+                desired_length = self.shape[0] * self.shape[1] * self.shape[2]
+                self.Image = np.concatenate((frame, np.random.rand(desired_length - len(frame)))).reshape(self.shape)
+            except ValueError:
                 print(e)
                 pass
                 
@@ -90,7 +99,7 @@ class RP_CLIENT:
 
 
 
-client = RP_CLIENT("192.168.192.168", 5050, "1234", (height, width, 3), 65500)
+client = RP_CLIENT("localhost", 8080, "1234", (height, width, 3), 65500)
 
 cv2.namedWindow("stream")
 
