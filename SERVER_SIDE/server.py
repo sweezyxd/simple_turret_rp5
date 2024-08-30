@@ -12,7 +12,7 @@ import pickle
 
 
 def test_func(key):
-    print(key)
+    pass
 
 def array_to_lenghts(data, dividor):
     arr = np.array([])
@@ -72,7 +72,7 @@ class SERVER:
                 for n in buffer_array:
                     y = "0" * (2 - len(y)) + y
                     self.__send( "PACKET_NUMBER_{}".format(y).encode()+ frame[x: x + n] + b"END_PACKET_")
-                    
+                    time.sleep(.01)
                     x += n
                     y = str(int(y) + 1)
                 self.__send(b"ENDED_FRAME")
@@ -128,4 +128,9 @@ class SERVER:
             self.__frame = frame
 
 # self, ip, port, password, image_shape, buffer_size, recvFunction
-
+server = SERVER("localhost", 8080, "1234", (640, 480, 3), 65000, test_func)
+server.start()
+array = np.ones(shape=(640, 480, 3), dtype=np.uint8) * 255
+while True:
+    
+    server.setFrame(array)
